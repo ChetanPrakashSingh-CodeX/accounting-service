@@ -2,18 +2,18 @@ version: '3.8'
 
 services:
   accounting-db:
-    image: postgres:15-alpine
+    image: postgres:16.1-alpine
     container_name: accounting-db
     environment:
-      POSTGRES_USER: notif_user
-      POSTGRES_PASSWORD: notif_pass
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: user2025!
       POSTGRES_DB: accounting_db
     ports:
       - "5434:5432"
     volumes:
       - accounting-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U notif_user -d accounting_db"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d accounting_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -24,13 +24,7 @@ services:
     ports:
       - "8004:8004"
     environment:
-      DATABASE_URL: postgresql://notif_user:notif_pass@accounting-db:5432/accounting_db
-      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
-      SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_USER: ${SMTP_USER:-}
-      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
-      SMS_API_KEY: ${SMS_API_KEY:-}
-      SMS_API_URL: ${SMS_API_URL:-}
+      DATABASE_URL: postgresql://postgres:user2025!@localhost:5432/accounting_db
     depends_on:
       accounting-db:
         condition: service_healthy
