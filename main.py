@@ -57,7 +57,7 @@ app.add_middleware(
 
 
 # Create a new account
-@app.post("/api/v1/account/create", response_model=AccountResponse, status_code=201)
+@app.post("/api/v1/accounts/create", response_model=AccountResponse, status_code=201)
 def create_account(request: schemas.CreateAccountRequest, db: Session = Depends(get_db)):
     
     """Generate a new account_id"""
