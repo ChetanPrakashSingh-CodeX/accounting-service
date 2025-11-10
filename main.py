@@ -125,7 +125,7 @@ def update_account_balance(account_number: int, request: schemas.AccountOpsReque
     )
 
 # Close an existing account
-@app.put("/api/v1/accounts/{account_number}/update_status",response_model=AccountOpsResponse, status_code=200)
+@app.post("/api/v1/accounts/{account_number}/close",response_model=AccountOpsResponse, status_code=200)
 def update_account_status(account_number: int, request: schemas.AccountOpsRequest,  db: Session = Depends(get_db)):
     """Close an existing account."""
     #account_number = request.account_number
@@ -135,6 +135,29 @@ def update_account_status(account_number: int, request: schemas.AccountOpsReques
 
     if request.status == 'CLOSE' and account.balance != 0:
         raise HTTPException(status_code=400, detail="Account balance must be zero to close the account")
+    #account.status = 'CLOSED'
+
+    # db.commit()
+    # db.refresh(account)
+    
+    return schemas.AccountOpsResponse(
+        account_number=account.account_number,
+        status=request.status,
+        correlation_id=request.correlation_id,
+        message="Account updated successfully"
+    )
+
+# Update an existing account status
+@app.patch("/api/v1/accounts/{account_number}/update_status",response_model=AccountOpsResponse, status_code=200)
+def update_account_status(account_number: int, request: schemas.AccountOpsRequest,  db: Session = Depends(get_db)):
+    """Close an existing account."""
+    #account_number = request.account_number
+    account = db.query(models.Accounts).filter(models.Accounts.account_number == account_number).first()
+    if not account:
+        raise HTTPException(status_code=404, detail="Account not found")
+
+    # if request.status == 'CLOSE' and account.balance != 0:
+    #     raise HTTPException(status_code=400, detail="Account balance must be zero to close the account")
     #account.status = 'CLOSED'
 
     # db.commit()
@@ -163,6 +186,23 @@ def fetch_account(account_number: int,  db: Session = Depends(get_db)):
         correlation_id="corr-12345-9876",
         message="Account fetched successfully"
     )
+
+# Fetch all accounts belonging to a customer
+@app.get("/api/v1/accounts/{customer_id}", response_model=AccountOpsResponse, status_code=200)
+def fetch_account(customer_id: int,  db: Session = Depends(get_db)):
+    """Fetch an account by its Number."""
+    accounts = db.query(models.Accounts).filter(models.Accounts.customer_id == str(customer_id)).all()
+    if not accounts:
+        #print(account_number)
+        raise HTTPException(status_code=404, detail="Customer not found")
+    return accounts
+    #         schemas.AccountOpsResponse(
+    #     account_number=account.account_number,
+    #     status=account.status,
+    #     balance=account.balance,
+    #     correlation_id="corr-12345-9876",
+    #     message="Accounts fetched successfully"
+    # )
 
 
 # if __name__ == "__main__":
